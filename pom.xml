@@ -5,50 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.fedorov-s-n</groupId>
-    <artifactId>suspend-utils</artifactId>
+    <artifactId>suspend-utils-example</artifactId>
     <version>1.0.0</version>
-
     <packaging>jar</packaging>
-    <name>Suspend utils</name>
-    <description>Utility classes to extend Kotlin suspend keyword to commonly used tools</description>
-    <url>https://fedorov-s-n.github.io/suspend-utils/suspend-utils/com.github.sfedorov.suspend/index.html</url>
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://github.com/fedorov-s-n/suspend-utils/blob/master/LICENSE</url>
-            <distribution>sources</distribution>
-        </license>
-    </licenses>
-    <scm>
-        <url>https://github.com/fedorov-s-n/suspend-utils</url>
-        <connection>scm:git:git://github.com/fedorov-s-n/suspend-utils.git</connection>
-        <developerConnection>scm:git:git@github.com:fedorov-s-n/suspend-utils.git</developerConnection>
-    </scm>
-    <developers>
-        <developer>
-            <email>fedorov.s.n@mail.ru</email>
-            <name>Sergey N. Fedorov</name>
-            <url>https://github.com/fedorov-s-n</url>
-            <id>fedorov-s-n</id>
-        </developer>
-    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -57,111 +22,20 @@
             <version>1.3.11</version>
         </dependency>
         <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test-junit</artifactId>
-            <version>1.3.11</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-jdk8</artifactId>
             <version>1.1.0</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
+            <groupId>com.github.fedorov-s-n</groupId>
+            <artifactId>suspend-utils</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>jcenter</id>
-            <name>JCenter</name>
-            <url>https://jcenter.bintray.com/</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.7</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.0.2</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/docs</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>target/dokka</directory>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -174,39 +48,10 @@
                             <goal>compile</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                    </execution>
                 </executions>
                 <configuration>
                     <jvmTarget>1.8</jvmTarget>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.jetbrains.dokka</groupId>
-                <artifactId>dokka-maven-plugin</artifactId>
-                <version>0.9.17</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>javadocJar</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>create-javadoc</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>dokka</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
