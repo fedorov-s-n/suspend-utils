@@ -6,12 +6,12 @@
 
     <groupId>com.github.fedorov-s-n</groupId>
     <artifactId>suspend-utils</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
 
     <packaging>jar</packaging>
     <name>Suspend utils</name>
     <description>Utility classes to extend Kotlin suspend keyword to commonly used tools</description>
-    <url>https://github.com/fedorov-s-n/suspend-utils</url>
+    <url>https://fedorov-s-n.github.io/suspend-utils/suspend-utils/com.github.sfedorov.suspend/index.html</url>
     <licenses>
         <license>
             <name>MIT License</name>
