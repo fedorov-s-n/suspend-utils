@@ -171,27 +171,27 @@ interface SuspendStream<T> {
     fun distinct(): SuspendStream<T>
 
     /**
-     * Returns a stream consisting of the elements of this stream, truncated to be no longer than maxSize in length.
+     * Returns a stream consisting of elements of this stream, truncated to be no longer than length.
      * This is a limiting intermediate operation.
      */
     fun limit(length: Int): SuspendStream<T>
 
     /**
-     * Returns a stream consisting of the remaining elements of this stream after discarding the first n elements
-     * of the stream. If this stream contains fewer than n elements then an empty stream will be returned.
+     * Returns a stream consisting of remaining elements of this stream after discarding the first count elements
+     * of the stream. If this stream contains fewer than count elements then an empty stream will be returned.
      * This is an intermediate operation.
      */
-    fun skip(length: Int): SuspendStream<T>
+    fun skip(count: Int): SuspendStream<T>
 
     /**
-     * Returns a stream consisting of the elements of this stream, truncated to contain elements until the given
-     * predicate returns true. This is a limiting intermediate operation.
+     * Returns a stream of elements from beginning to the first element that doesn't match the given predicate.
+     * This is a limiting intermediate operation.
      */
     fun takeWhile(predicate: suspend (T) -> Boolean): SuspendStream<T>
 
     /**
-     * Returns a stream consisting of the remaining elements of this stream after the given predicate returns false
-     * the first time. If the predicate always returns true then an empty stream will be returned.
+     * Skips elements from beginning to the first element that doesn't match the given predicate and returns a stream
+     * of all remaining elements. If the predicate always returns true then an empty stream will be returned.
      * This is an intermediate operation.
      */
     fun skipUntil(predicate: suspend (T) -> Boolean): SuspendStream<T>
@@ -522,10 +522,10 @@ internal sealed class Origin<T> {
                     }
                 }
 
-                internal class Skip<T>(val length: Int, source: Origin<T>) : FutureOrdered<T, AtomicInteger>(source) {
+                internal class Skip<T>(val count: Int, source: Origin<T>) : FutureOrdered<T, AtomicInteger>(source) {
                     override fun createCollector() = AtomicInteger()
                     override suspend fun filter(element: T, collector: AtomicInteger): Boolean {
-                        return collector.incrementAndGet() > length
+                        return collector.incrementAndGet() > count
                     }
                 }
 
@@ -699,11 +699,17 @@ internal abstract class AbstractStream<T>(protected val origin: Origin<T>) : Sus
     override fun sort(comparator: Comparator<in T>) =
         createStream(Origin.Intermediate.Sort(comparator, origin))
 
-    override fun limit(length: Int): SuspendStream<T> =
-        createStream(Origin.Intermediate.Ordered.ExecutionOrdered.Limit(length, origin))
+    override fun limit(length: Int): SuspendStream<T> = when {
+        length < 0 -> throw IllegalArgumentException("Length cannot be negative")
+        length == 0 -> SuspendStream.emptyStream()
+        else -> createStream(Origin.Intermediate.Ordered.ExecutionOrdered.Limit(length, origin))
+    }
 
-    override fun skip(length: Int): SuspendStream<T> =
-        createStream(Origin.Intermediate.Ordered.FutureOrdered.Skip(length, origin))
+    override fun skip(count: Int): SuspendStream<T> = when {
+        count < 0 -> throw IllegalArgumentException("Count cannot be negative")
+        count == 0 -> this
+        else -> createStream(Origin.Intermediate.Ordered.FutureOrdered.Skip(count, origin))
+    }
 
     override fun takeWhile(predicate: suspend (T) -> Boolean) =
         createStream(Origin.Intermediate.Ordered.ExecutionOrdered.TakeWhile(predicate, origin))
@@ -870,7 +876,7 @@ internal class EmptyStream<T> : SuspendStream<T> {
     override fun sort(comparator: Comparator<in T>): SuspendStream<T> = this
     override fun distinct(): SuspendStream<T> = this
     override fun limit(length: Int): SuspendStream<T> = this
-    override fun skip(length: Int): SuspendStream<T> = this
+    override fun skip(count: Int): SuspendStream<T> = this
     override fun takeWhile(predicate: suspend (T) -> Boolean): SuspendStream<T> = this
     override fun skipUntil(predicate: suspend (T) -> Boolean): SuspendStream<T> = this
     override suspend fun <C> collect(collector: Collector<T, C>): C = collector.getResult()
