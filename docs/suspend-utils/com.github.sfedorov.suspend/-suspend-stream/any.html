@@ -1,0 +1,18 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>SuspendStream.any - suspend-utils</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">suspend-utils</a>&nbsp;/&nbsp;<a href="../index.html">com.github.sfedorov.suspend</a>&nbsp;/&nbsp;<a href="index.html">SuspendStream</a>&nbsp;/&nbsp;<a href="./any.html">any</a><br/>
+<br/>
+<h1>any</h1>
+<a name="com.github.sfedorov.suspend.SuspendStream$any(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, kotlin.Boolean)))"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">any</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$any(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, kotlin.Boolean)))/predicate">predicate</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Returns whether any elements of this stream match the provided predicate.
+Should not evaluate the predicate on all elements if not necessary for determining the result.
+If the stream is empty then false is returned and the predicate is not evaluated.
+This is a short-circuiting terminal operation.</p>
+</BODY>
+</HTML>

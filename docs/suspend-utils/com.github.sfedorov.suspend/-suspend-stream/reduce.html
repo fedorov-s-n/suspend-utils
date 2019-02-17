@@ -1,0 +1,21 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>SuspendStream.reduce - suspend-utils</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">suspend-utils</a>&nbsp;/&nbsp;<a href="../index.html">com.github.sfedorov.suspend</a>&nbsp;/&nbsp;<a href="index.html">SuspendStream</a>&nbsp;/&nbsp;<a href="./reduce.html">reduce</a><br/>
+<br/>
+<h1>reduce</h1>
+<a name="com.github.sfedorov.suspend.SuspendStream$reduce(com.github.sfedorov.suspend.SuspendStream.reduce.U, kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.reduce.U, com.github.sfedorov.suspend.SuspendStream.T, )))"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">U</span><span class="symbol">&gt;</span> <span class="identifier">reduce</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$reduce(com.github.sfedorov.suspend.SuspendStream.reduce.U, kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.reduce.U, com.github.sfedorov.suspend.SuspendStream.T, )))/unit">unit</span><span class="symbol">:</span>&nbsp;<a href="reduce.html#U"><span class="identifier">U</span></a><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$reduce(com.github.sfedorov.suspend.SuspendStream.reduce.U, kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.reduce.U, com.github.sfedorov.suspend.SuspendStream.T, )))/mergeFunction">mergeFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="reduce.html#U"><span class="identifier">U</span></a><span class="symbol">,</span>&nbsp;<a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="reduce.html#U"><span class="identifier">U</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="reduce.html#U"><span class="identifier">U</span></a></code>
+<p>Performs a reduction on the elements of this stream, using the provided identity value and an accumulation
+function, and returns the reduced value. Elements are ordered. This is a terminal operation.</p>
+<a name="com.github.sfedorov.suspend.SuspendStream$reduce(kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.T, , )))"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">reduce</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$reduce(kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.T, , )))/mergeFunction">mergeFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">,</span>&nbsp;<a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">?</span></code>
+<p>Performs a reduction on the elements of this stream, using an associative accumulation function,
+and returns the reduced value, if any, or null otherwise. Elements are ordered. This is a terminal operation.
+Null can be returned also in case when stream type allows null elements and null is the result of reduction.</p>
+</BODY>
+</HTML>

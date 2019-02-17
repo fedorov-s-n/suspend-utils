@@ -1,0 +1,18 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>SuspendStream.distinct - suspend-utils</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">suspend-utils</a>&nbsp;/&nbsp;<a href="../index.html">com.github.sfedorov.suspend</a>&nbsp;/&nbsp;<a href="index.html">SuspendStream</a>&nbsp;/&nbsp;<a href="./distinct.html">distinct</a><br/>
+<br/>
+<h1>distinct</h1>
+<a name="com.github.sfedorov.suspend.SuspendStream$distinct()"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">distinct</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the distinct elements (according to Object.equals(Object)) of this stream.
+The element appearing first is preserved. Element order is preserved: results of executing this method on
+parallel and sequential streams are the same. This is a non-blocking intermediate operation. However, the stream
+has a state that depends on the stream size, so executing it on unlimited stream leads to unlimited memory usage.</p>
+</BODY>
+</HTML>

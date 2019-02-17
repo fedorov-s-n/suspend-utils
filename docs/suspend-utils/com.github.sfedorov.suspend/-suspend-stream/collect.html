@@ -1,0 +1,19 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>SuspendStream.collect - suspend-utils</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">suspend-utils</a>&nbsp;/&nbsp;<a href="../index.html">com.github.sfedorov.suspend</a>&nbsp;/&nbsp;<a href="index.html">SuspendStream</a>&nbsp;/&nbsp;<a href="./collect.html">collect</a><br/>
+<br/>
+<h1>collect</h1>
+<a name="com.github.sfedorov.suspend.SuspendStream$collect(com.github.sfedorov.suspend.Collector((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.collect.C)))"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">C</span><span class="symbol">&gt;</span> <span class="identifier">collect</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$collect(com.github.sfedorov.suspend.Collector((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.collect.C)))/collector">collector</span><span class="symbol">:</span>&nbsp;<a href="../-collector/index.html"><span class="identifier">Collector</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">,</span>&nbsp;<a href="collect.html#C"><span class="identifier">C</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="collect.html#C"><span class="identifier">C</span></a></code>
+<p>Performs a mutable reduction operation on the elements of this stream using a Collector.
+A Collector encapsulates the functions to consume an element and to return result.
+Reduction performs sequentially even if the stream is parallel. Elements come in order, all required
+synchronization is done in stream implementation, so Collector implementation shouldn't care about that.
+This is a terminal operation.</p>
+</BODY>
+</HTML>

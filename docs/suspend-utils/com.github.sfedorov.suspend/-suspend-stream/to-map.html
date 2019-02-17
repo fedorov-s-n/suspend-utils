@@ -1,0 +1,17 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>SuspendStream.toMap - suspend-utils</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">suspend-utils</a>&nbsp;/&nbsp;<a href="../index.html">com.github.sfedorov.suspend</a>&nbsp;/&nbsp;<a href="index.html">SuspendStream</a>&nbsp;/&nbsp;<a href="./to-map.html">toMap</a><br/>
+<br/>
+<h1>toMap</h1>
+<a name="com.github.sfedorov.suspend.SuspendStream$toMap(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.K)), kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.V)))"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">K</span><span class="symbol">, </span><span class="identifier">V</span><span class="symbol">&gt;</span> <span class="identifier">toMap</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$toMap(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.K)), kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.V)))/keyFunction">keyFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="to-map.html#K"><span class="identifier">K</span></a><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$toMap(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.K)), kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.V)))/valueFunction">valueFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="to-map.html#V"><span class="identifier">V</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="to-map.html#K"><span class="identifier">K</span></a><span class="symbol">,</span>&nbsp;<a href="to-map.html#V"><span class="identifier">V</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a Map whose keys and values are the result of applying the provided mapping functions to the input
+elements. If the mapped keys contain duplicates (according to { @link Object#equals(Object) }), the last value
+retains mapped by the key. This is a terminal operation.</p>
+</BODY>
+</HTML>

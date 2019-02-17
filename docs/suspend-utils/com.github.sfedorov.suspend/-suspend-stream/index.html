@@ -1,0 +1,399 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>SuspendStream - suspend-utils</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">suspend-utils</a>&nbsp;/&nbsp;<a href="../index.html">com.github.sfedorov.suspend</a>&nbsp;/&nbsp;<a href="./index.html">SuspendStream</a><br/>
+<br/>
+<h1>SuspendStream</h1>
+<code><span class="keyword">interface </span><span class="identifier">SuspendStream</span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span></code>
+<p>Suspended stream is an interface that allows to program in functional-like style with Kotlin suspend functions.
+Qualifiers: either sequential or parallel, lazy, ordered, reusable, possibly infinite, suspended.</p>
+<p>Suspended streams are lazy. No function is going to be called on elements that are filtered out or skipped.
+No action is going to be taken until terminate method is called. All terminate methods have <code>suspend</code>
+modifier and all intermediate ones have not.</p>
+<p>Extremely large and even infinite streams are supported, including parallel mode. Parallel infinite streams elements
+are handled in sequential manner until limiting condition (conditions from <code>limit()</code> or <code>takeWhile()</code>) is met or
+until terminate method interrupts consuming (the following methods can do that: <code>any()</code>, <code>all()</code>, <code>first()</code>).
+Parallel infinite streams elements are handled in parallel in all other cases. If a terminate method without
+short-circuit evaluation is called on an infinite parallel stream, exception is to be thrown. That measure doesn't
+guarantee that parallel execution of infinite stream will not be started (it's possible, for instance, call
+<code>takeWhile { true }</code> or <code>any { false }</code>), but serves as foolproof for cases when it's possible to detect an infinite
+parallel stream without dynamic code analysis. Other cases are responsibility of developer using the class.</p>
+<p>Elements of both parallel and sequential streams are ordered: the element order is preserved when elements
+are passed to terminal method callbacks. However, the execution order is not preserved in the parallel stream.
+Thus, calls to intermediate methods for different elements may come in any order. Element and execution order in
+sequential stream are always preserved: the next element handling starts only when the previous one has ended.</p>
+<p>Suspended streams are reusable. A stream has no state, all parameters it keeps are final. A state only exists as
+a set of local variables created on a terminate method call. So it's valid to call a terminate method of the same
+stream several times. However, idempotency is not guaranteed in any cases. Input collections/arrays/sequences
+or their elements are neither copied nor cached. Results are not cached anywhere. If a stream is created
+from a collection, changing the collection before call to a terminate method will change the stream as well.
+More, if an iterable or a sequence used as input to stream only allows to be iterated once, stream will not have
+correct results on the second terminate method call.</p>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="all.html">all</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">all</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$all(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, kotlin.Boolean)))/predicate">predicate</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Returns whether all elements of this stream match the provided predicate.
+Should not evaluate the predicate on all elements if not necessary for determining the result.
+If the stream is empty then true is returned and the predicate is not evaluated.
+This is a short-circuiting terminal operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="any.html">any</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">any</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$any(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, kotlin.Boolean)))/predicate">predicate</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Returns whether any elements of this stream match the provided predicate.
+Should not evaluate the predicate on all elements if not necessary for determining the result.
+If the stream is empty then false is returned and the predicate is not evaluated.
+This is a short-circuiting terminal operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="collect.html">collect</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">C</span><span class="symbol">&gt;</span> <span class="identifier">collect</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$collect(com.github.sfedorov.suspend.Collector((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.collect.C)))/collector">collector</span><span class="symbol">:</span>&nbsp;<a href="../-collector/index.html"><span class="identifier">Collector</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">,</span>&nbsp;<a href="collect.html#C"><span class="identifier">C</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="collect.html#C"><span class="identifier">C</span></a></code>
+<p>Performs a mutable reduction operation on the elements of this stream using a Collector.
+A Collector encapsulates the functions to consume an element and to return result.
+Reduction performs sequentially even if the stream is parallel. Elements come in order, all required
+synchronization is done in stream implementation, so Collector implementation shouldn't care about that.
+This is a terminal operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="distinct.html">distinct</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">distinct</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the distinct elements (according to Object.equals(Object)) of this stream.
+The element appearing first is preserved. Element order is preserved: results of executing this method on
+parallel and sequential streams are the same. This is a non-blocking intermediate operation. However, the stream
+has a state that depends on the stream size, so executing it on unlimited stream leads to unlimited memory usage.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="filter.html">filter</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">filter</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$filter(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, kotlin.Boolean)))/predicate">predicate</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the elements of this stream that match the given predicate.
+This is an intermediate operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="first.html">first</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">first</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">?</span></code>
+<p>Returns the first element of this stream, or null if the stream is empty. Elements are ordered.
+This is a short-circuiting terminal operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="flat-map.html">flatMap</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">K</span><span class="symbol">&gt;</span> <span class="identifier">flatMap</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$flatMap(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream((com.github.sfedorov.suspend.SuspendStream.flatMap.K)))))/mappingFunction">mappingFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="flat-map.html#K"><span class="identifier">K</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="flat-map.html#K"><span class="identifier">K</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the results of replacing each element of this stream with the contents of
+a mapped stream produced by applying the provided mapping function to each element.
+Each mapped stream is closed after its contents have been placed into this stream.
+This is an intermediate operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="for-each.html">forEach</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">forEach</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$forEach(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, kotlin.Unit)))/consumer">consumer</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Performs an action for each element of this stream. Elements are ordered. This is a terminal operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="last.html">last</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">last</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">?</span></code>
+<p>Returns the last element of this stream, or null if the stream is empty. Elements are ordered.
+This is a short-circuiting terminal operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="limit.html">limit</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">limit</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$limit(kotlin.Int)/length">length</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the elements of this stream, truncated to be no longer than maxSize in length.
+This is a limiting intermediate operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="map.html">map</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">K</span><span class="symbol">&gt;</span> <span class="identifier">map</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$map(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.map.K)))/mappingFunction">mappingFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="map.html#K"><span class="identifier">K</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="map.html#K"><span class="identifier">K</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the results of applying the given function to the elements of this stream.
+This is an intermediate operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="max.html">max</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">max</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$max(kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.T, , kotlin.Int)))/comparator">comparator</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">,</span>&nbsp;<a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">?</span></code>
+<p>Returns the maximum element of this stream according to the provided Comparator.
+This is a special case of a reduction. This is a terminal operation.
+Null is returned when the stream contains no elements or null is the maximum value according to the comparator.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="min.html">min</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">min</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$min(kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.T, , kotlin.Int)))/comparator">comparator</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">,</span>&nbsp;<a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">?</span></code>
+<p>Returns the minimum element of this stream according to the provided Comparator.
+This is a special case of a reduction. This is a terminal operation.
+Null is returned when the stream contains no elements or null is the minimum value according to the comparator.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="peek.html">peek</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">peek</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$peek(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, kotlin.Unit)))/consumer">consumer</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the elements of this stream, additionally performing the provided action
+on each element as elements are consumed from the resulting stream.
+This is an intermediate operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="reduce.html">reduce</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">U</span><span class="symbol">&gt;</span> <span class="identifier">reduce</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$reduce(com.github.sfedorov.suspend.SuspendStream.reduce.U, kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.reduce.U, com.github.sfedorov.suspend.SuspendStream.T, )))/unit">unit</span><span class="symbol">:</span>&nbsp;<a href="reduce.html#U"><span class="identifier">U</span></a><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$reduce(com.github.sfedorov.suspend.SuspendStream.reduce.U, kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.reduce.U, com.github.sfedorov.suspend.SuspendStream.T, )))/mergeFunction">mergeFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="reduce.html#U"><span class="identifier">U</span></a><span class="symbol">,</span>&nbsp;<a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="reduce.html#U"><span class="identifier">U</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="reduce.html#U"><span class="identifier">U</span></a></code>
+<p>Performs a reduction on the elements of this stream, using the provided identity value and an accumulation
+function, and returns the reduced value. Elements are ordered. This is a terminal operation.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">reduce</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$reduce(kotlin.SuspendFunction2((com.github.sfedorov.suspend.SuspendStream.T, , )))/mergeFunction">mergeFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">,</span>&nbsp;<a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">?</span></code>
+<p>Performs a reduction on the elements of this stream, using an associative accumulation function,
+and returns the reduced value, if any, or null otherwise. Elements are ordered. This is a terminal operation.
+Null can be returned also in case when stream type allows null elements and null is the result of reduction.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="skip.html">skip</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">skip</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$skip(kotlin.Int)/length">length</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the remaining elements of this stream after discarding the first n elements
+of the stream. If this stream contains fewer than n elements then an empty stream will be returned.
+This is an intermediate operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="skip-until.html">skipUntil</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">skipUntil</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$skipUntil(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, kotlin.Boolean)))/predicate">predicate</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the remaining elements of this stream after the given predicate returns false
+the first time. If the predicate always returns true then an empty stream will be returned.
+This is an intermediate operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="sort.html">sort</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">sort</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$sort(java.util.Comparator((com.github.sfedorov.suspend.SuspendStream.T)))/comparator">comparator</span><span class="symbol">:</span>&nbsp;<a href="http://docs.oracle.com/javase/6/docs/api/java/util/Comparator.html"><span class="identifier">Comparator</span></a><span class="symbol">&lt;</span><span class="keyword">in</span>&nbsp;<a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a str * eam consisting of the elements of this stream, sorted according to comparator.
+This is a blocking intermediate operation. Parallel stream should be limited before calling this method.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="take-while.html">takeWhile</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">takeWhile</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$takeWhile(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, kotlin.Boolean)))/predicate">predicate</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the elements of this stream, truncated to contain elements until the given
+predicate returns true. This is a limiting intermediate operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="to-list.html">toList</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">toList</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a List containing all elements produced by this stream. Elements are ordered.
+This is a terminal operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="to-map.html">toMap</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">K</span><span class="symbol">, </span><span class="identifier">V</span><span class="symbol">&gt;</span> <span class="identifier">toMap</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$toMap(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.K)), kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.V)))/keyFunction">keyFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="to-map.html#K"><span class="identifier">K</span></a><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream$toMap(kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.K)), kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.T, com.github.sfedorov.suspend.SuspendStream.toMap.V)))/valueFunction">valueFunction</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="to-map.html#V"><span class="identifier">V</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="to-map.html#K"><span class="identifier">K</span></a><span class="symbol">,</span>&nbsp;<a href="to-map.html#V"><span class="identifier">V</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a Map whose keys and values are the result of applying the provided mapping functions to the input
+elements. If the mapped keys contain duplicates (according to { @link Object#equals(Object) }), the last value
+retains mapped by the key. This is a terminal operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="to-set.html">toSet</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">suspend</span> <span class="keyword">fun </span><span class="identifier">toSet</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><span class="identifier">Set</span></a><span class="symbol">&lt;</span><a href="index.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a Set containing all elements produced by this stream. Elements are ordered.
+This is a terminal operation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="empty-stream.html">emptyStream</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">emptyStream</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="empty-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Creates an empty stream of given type</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="parallel-stream.html">parallelStream</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">parallelStream</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.collections.Iterable((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/iterable">iterable</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterable/index.html"><span class="identifier">Iterable</span></a><span class="symbol">&lt;</span><a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.collections.Iterable((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/coroutineContext">coroutineContext</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html"><span class="identifier">CoroutineContext</span></a>&nbsp;<span class="symbol">=</span>&nbsp;Dispatchers.Default<span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.collections.Iterable((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/finite">finite</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;iterable.limited<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Creates parallel stream from <a href="parallel-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.collections.Iterable((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/iterable">iterable</a>. Stream is considered limited for collections and closed ranges
+ans unlimited otherwise. Use argument <a href="parallel-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.collections.Iterable((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/finite">finite</a> to overwrite this setting. Unlimited stream is handled
+as a sequential one until a limit is met and in parallel after that.</p>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">parallelStream</span><span class="symbol">(</span><span class="keyword">vararg</span> <span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.Array((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/values">values</span><span class="symbol">:</span>&nbsp;<a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.Array((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/coroutineContext">coroutineContext</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html"><span class="identifier">CoroutineContext</span></a>&nbsp;<span class="symbol">=</span>&nbsp;Dispatchers.Default<span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.Array((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/finite">finite</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Creates a parallel stream from <a href="parallel-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.Array((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/values">values</a>. To use array values as input, use <code>*array</code>. The stream is considered
+limited until argument <a href="parallel-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.Array((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/finite">finite</a> is set to false. Unlimited stream is handled as a sequential one
+until a limit is met and in parallel after that.</p>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">parallelStream</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.sequences.Sequence((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/sequence">sequence</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.sequences/-sequence/index.html"><span class="identifier">Sequence</span></a><span class="symbol">&lt;</span><a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.sequences.Sequence((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/coroutineContext">coroutineContext</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html"><span class="identifier">CoroutineContext</span></a>&nbsp;<span class="symbol">=</span>&nbsp;Dispatchers.Default<span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.sequences.Sequence((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/finite">finite</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;false<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Creates a parallel stream from <a href="parallel-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.sequences.Sequence((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/sequence">sequence</a>. The stream is considered unlimited until argument <a href="parallel-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(kotlin.sequences.Sequence((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T)), kotlin.coroutines.CoroutineContext, kotlin.Boolean)/finite">finite</a> is set
+to true. Unlimited stream is handled as a sequential one until a limit is met and in parallel after that.</p>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">parallelStream</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, )), kotlin.coroutines.CoroutineContext)/unit">unit</span><span class="symbol">:</span>&nbsp;<a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, )), kotlin.coroutines.CoroutineContext)/generator">generator</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, )), kotlin.coroutines.CoroutineContext)/coroutineContext">coroutineContext</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html"><span class="identifier">CoroutineContext</span></a>&nbsp;<span class="symbol">=</span>&nbsp;Dispatchers.Default<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code><br/>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">parallelStream</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, kotlin.coroutines.CoroutineContext, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, )))/unit">unit</span><span class="symbol">:</span>&nbsp;<a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, kotlin.coroutines.CoroutineContext, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, )))/coroutineContext">coroutineContext</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html"><span class="identifier">CoroutineContext</span></a>&nbsp;<span class="symbol">=</span>&nbsp;Dispatchers.Default<span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, kotlin.coroutines.CoroutineContext, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, )))/generator">generator</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="parallel-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Creates a parallel stream from initial value <a href="parallel-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, )), kotlin.coroutines.CoroutineContext)/unit">unit</a> and <a href="parallel-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$parallelStream(com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.parallelStream.T, )), kotlin.coroutines.CoroutineContext)/generator">generator</a>. The stream should be limited with
+either <a href="limit.html">limit</a> or <a href="take-while.html">takeWhile</a> method. Another option is to terminate stream with short-circuit operation.
+Unlimited stream is handled as a sequential one until the limit is met and in parallel after that.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="sequential-stream.html">sequentialStream</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">sequentialStream</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(kotlin.collections.Iterable((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T)))/iterable">iterable</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterable/index.html"><span class="identifier">Iterable</span></a><span class="symbol">&lt;</span><a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Creates sequential stream from <a href="sequential-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(kotlin.collections.Iterable((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T)))/iterable">iterable</a></p>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">sequentialStream</span><span class="symbol">(</span><span class="keyword">vararg</span> <span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(kotlin.Array((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T)))/values">values</span><span class="symbol">:</span>&nbsp;<a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Creates sequential stream from <a href="sequential-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(kotlin.Array((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T)))/values">values</a>. To use array values as input, use <code>*array</code>.</p>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">sequentialStream</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(kotlin.sequences.Sequence((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T)))/sequence">sequence</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.sequences/-sequence/index.html"><span class="identifier">Sequence</span></a><span class="symbol">&lt;</span><a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Creates sequential stream from <a href="sequential-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(kotlin.sequences.Sequence((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T)))/sequence">sequence</a>.</p>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span><span class="symbol">&gt;</span> <span class="identifier">sequentialStream</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T, )))/unit">unit</span><span class="symbol">:</span>&nbsp;<a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T, )))/generator">generator</span><span class="symbol">:</span>&nbsp;<span class="keyword">suspend </span><span class="symbol">(</span><a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="sequential-stream.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Creates unlimited stream from initial value <a href="sequential-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T, )))/unit">unit</a> and <a href="sequential-stream.html#com.github.sfedorov.suspend.SuspendStream.Companion$sequentialStream(com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T, kotlin.SuspendFunction1((com.github.sfedorov.suspend.SuspendStream.Companion.sequentialStream.T, )))/generator">generator</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Extension Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../filter.html">filter</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">K</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span> <a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><span class="identifier">*</span><span class="symbol">&gt;</span><span class="symbol">.</span><span class="identifier">filter</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="../filter.html#K"><span class="identifier">K</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the elements of this stream that have the given type.
+This is an intermediate operation. Result stream is of given type.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../join.html">join</a></p>
+</td>
+<td>
+<code><span class="keyword">suspend</span> <span class="keyword">fun </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">.</span><span class="identifier">join</span><span class="symbol">(</span><span class="identifier" id="com.github.sfedorov.suspend$join(com.github.sfedorov.suspend.SuspendStream((kotlin.String)), kotlin.String, kotlin.String, kotlin.String)/delimiter">delimiter</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a>&nbsp;<span class="symbol">=</span>&nbsp;", "<span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend$join(com.github.sfedorov.suspend.SuspendStream((kotlin.String)), kotlin.String, kotlin.String, kotlin.String)/prefix">prefix</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a>&nbsp;<span class="symbol">=</span>&nbsp;""<span class="symbol">, </span><span class="identifier" id="com.github.sfedorov.suspend$join(com.github.sfedorov.suspend.SuspendStream((kotlin.String)), kotlin.String, kotlin.String, kotlin.String)/suffix">suffix</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a>&nbsp;<span class="symbol">=</span>&nbsp;""<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code>
+<p>Returns a String that is a concatenation of the input elements. Elements are ordered. This is a terminal operation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../max.html">max</a></p>
+</td>
+<td>
+<code><span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-comparable/index.html"><span class="identifier">Comparable</span></a><span class="symbol">&lt;</span><a href="../max.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">&gt;</span> <a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="../max.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">.</span><span class="identifier">max</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../max.html#T"><span class="identifier">T</span></a><span class="symbol">?</span></code>
+<p>Returns the maximum element of this stream according to natural order.
+This is a special case of a reduction. This is a terminal operation.
+Null is returned when the stream contains no elements or null is the maximum value according to natural order.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../min.html">min</a></p>
+</td>
+<td>
+<code><span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-comparable/index.html"><span class="identifier">Comparable</span></a><span class="symbol">&lt;</span><a href="../min.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">&gt;</span> <a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="../min.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">.</span><span class="identifier">min</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../min.html#T"><span class="identifier">T</span></a><span class="symbol">?</span></code>
+<p>Returns the minimum element of this stream according to natural order.
+This is a special case of a reduction. This is a terminal operation.
+Null is returned when the stream contains no elements or null is the minimum value according to natural order.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../sort.html">sort</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-comparable/index.html"><span class="identifier">Comparable</span></a><span class="symbol">&lt;</span><a href="../sort.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">&gt;</span> <a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="../sort.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">.</span><span class="identifier">sort</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="../sort.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span></code>
+<p>Returns a stream consisting of the elements of this stream, sorted according to natural order.
+This is a blocking intermediate operation. Parallel stream should be limited before calling this method.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../sum.html">sum</a></p>
+</td>
+<td>
+<code><span class="keyword">suspend</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">T</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-number/index.html"><span class="identifier">Number</span></a><span class="symbol">&gt;</span> <a href="./index.html"><span class="identifier">SuspendStream</span></a><span class="symbol">&lt;</span><a href="../sum.html#T"><span class="identifier">T</span></a><span class="symbol">&gt;</span><span class="symbol">.</span><span class="identifier">sum</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../sum.html#T"><span class="identifier">T</span></a></code>
+<p>Returns the sum of elements in this stream. This is a special case of a reduction. This is a terminal operation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>
